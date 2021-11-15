@@ -24,4 +24,7 @@ public:
 
 	// Xóa các kí tự trắng bên phải xâu s
 	static string trimRight(string s);
+
+	// Chuyển letter thành string: \\\\.\\F:
+	static wchar_t* getStrLetter(char letter);
 };

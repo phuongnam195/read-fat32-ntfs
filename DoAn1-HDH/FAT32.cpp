@@ -1,6 +1,4 @@
-﻿#pragma warning(disable:4996)
-
-#include "FAT32.h"
+﻿#include "FAT32.h"
 #include "Utils.h"
 #include "Item_FAT32.h"
 #include <Windows.h>
@@ -22,7 +20,7 @@ FAT32::~FAT32() {}
 
 void FAT32::readInfo() {
 	BYTE result[512];
-	Utils::ReadSector(getStrLetter(), 0, result);
+	Utils::ReadSector(Utils::getStrLetter(driveLetter), 0, result);
 	memcpy(&info, result, 512);
 
 	bytesPerSector = Utils::reverseByte(info.BPB_BytsPerSec, 2);
@@ -37,15 +35,15 @@ void FAT32::printInfo() {
 	cout << " ________________________________________________" << endl;
 	cout << "|                   BOOTSECTOR                   |" << endl;
 	cout << "|------------------------------------------------|" << endl;
-	cout << "| Bytes / Sector            | " << setw(SPACE) << bytesPerSector << " |" << endl;
-	cout << "| Sectors / Cluster         | " << setw(SPACE) << sectorsPerCluster << " |" << endl;
-	cout << "| Reserved Sectors          | " << setw(SPACE) << Utils::reverseByte(info.BPB_RsvdSecCnt, 2) << " |" << endl;
+	cout << "| Bytes per sector          | " << setw(SPACE) << bytesPerSector << " |" << endl;
+	cout << "| Sectors per cluster       | " << setw(SPACE) << sectorsPerCluster << " |" << endl;
+	cout << "| Reserved sectors          | " << setw(SPACE) << Utils::reverseByte(info.BPB_RsvdSecCnt, 2) << " |" << endl;
 	cout << "| Number of FATs            | " << setw(SPACE) << Utils::reverseByte(info.BPB_NumFATs, 1) << " |" << endl;
 	cout << "| Media Type                | " << setw(SPACE) << (Utils::reverseByte(info.BPB_Media,1) == 0xF8 ? "Fixed Disk (F8)" : Utils::decToHex(Utils::reverseByte(info.BPB_Media, 1))) << " |" << endl;
 	cout << "| Sectors / Track           | " << setw(SPACE) << Utils::reverseByte(info.BPB_SecPerTrk, 2) << " |" << endl;
 	cout << "| Number of Heads           | " << setw(SPACE) << Utils::reverseByte(info.BPB_NumHeads, 2) << " |" << endl;
-	cout << "| Number of Hidden Sectors  | " << setw(SPACE) << Utils::reverseByte(info.BPB_HiddSec, 4) << " |" << endl;
-	cout << "| Number of Sectors         | " << setw(SPACE) << Utils::reverseByte(info.BPB_TotSec32, 4) << " |" << endl;
+	cout << "| Hidden Sectors            | " << setw(SPACE) << Utils::reverseByte(info.BPB_HiddSec, 4) << " |" << endl;
+	cout << "| Total sectors             | " << setw(SPACE) << Utils::reverseByte(info.BPB_TotSec32, 4) << " |" << endl;
 	cout << "| Sectors / FAT             | " << setw(SPACE) << Utils::reverseByte(info.BPB_FATSz32, 4) << " |" << endl;
 	cout << "| Cluster Number for RDET   | " << setw(SPACE) << Utils::reverseByte(info.BPB_RootClus, 4) << " |" << endl;
 	string logicalDriveNumber;
@@ -65,19 +63,6 @@ void FAT32::printInfo() {
 	cout << endl;
 }
 
-wchar_t* FAT32::getStrLetter() {
-	wchar_t* result;
-
-	string s = "\\\\.\\";
-	s.push_back(driveLetter);
-	s.push_back(':');
-	const size_t cSize = strlen(s.c_str()) + 1;
-	result = new wchar_t[cSize];
-	mbstowcs(result, s.c_str(), cSize);
-
-	return result;
-}
-
 uint64_t FAT32::getOffsetRDET() {
 	return sectorRDET * bytesPerSector;
 }
@@ -90,7 +75,7 @@ void FAT32::readFAT1() {
 	uint64_t sectorsPerFAT = Utils::reverseByte(info.BPB_FATSz32, 4);
 	uint64_t bytesPerFAT = sectorsPerFAT * bytesPerSector;
 	BYTE* bytesFAT1 = new BYTE[bytesPerFAT];
-	Utils::ReadSector(getStrLetter(), sectorFAT1 * bytesPerSector, bytesFAT1, bytesPerFAT);
+	Utils::ReadSector(Utils::getStrLetter(driveLetter), sectorFAT1 * bytesPerSector, bytesFAT1, bytesPerFAT);
 	for (int i = 0; i < bytesPerFAT / 4; i++) {
 		long value = bytesFAT1[i * 4 + 3];
 		value = value * 16 * 16 + bytesFAT1[i * 4 + 2];
@@ -229,7 +214,7 @@ void FAT32::printData(Item_FAT32 file) {
 	for (int iSector = 0; iSector < sectors.size(); iSector++) {
 		long long offset = sectors[iSector]; offset *= 512;
 		BYTE data[513];
-		Utils::ReadSector(getStrLetter(), offset, data);
+		Utils::ReadSector(Utils::getStrLetter(driveLetter), offset, data);
 		data[512] = '\0';
 		if (remainSize >= 512) {
 			cout << data;
@@ -315,7 +300,7 @@ vector<Item_FAT32> FAT32::scanItemsInRDET() {
 	}
 
 	BYTE bytesRDET[4096];
-	Utils::ReadSector(getStrLetter(), sectorRDET * bytesPerSector, bytesRDET, 4096);
+	Utils::ReadSector(Utils::getStrLetter(driveLetter), sectorRDET * bytesPerSector, bytesRDET, 4096);
 	int index = 0;
 
 	while (index < 4096 / 32) {
@@ -439,7 +424,7 @@ vector<Item_FAT32> FAT32::scanItemsInSDET(vector<int> sectors) {
 
 	for (int iSector = 0; iSector < sectors.size(); iSector++) {
 		BYTE bytesSector[512];
-		Utils::ReadSector(getStrLetter(), (long long)sectors[iSector] * bytesPerSector, bytesSector);
+		Utils::ReadSector(Utils::getStrLetter(driveLetter), (long long)sectors[iSector] * bytesPerSector, bytesSector);
 		
 		for (int iEntry = 0; iEntry < 512 / 32; iEntry++) {
 			BYTE entry[32];

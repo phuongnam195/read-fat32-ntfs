@@ -6,7 +6,7 @@
 #include <string>
 using namespace std;
 
-struct Bootsector_FAT32 {
+struct Bootsector {
 	uint8_t BS_jmpBoot[3];                      //Lệnh nhảy đến đoạn boot code - 3 bytes
 	uint8_t BS_OEMName[8];                      //Version / tên hệ điều hành - 8 bytes
 	uint8_t BPB_BytsPerSec[2];                  //Số bytes/sector - 2 bytes
@@ -42,7 +42,7 @@ struct Bootsector_FAT32 {
 class FAT32 {
 private:
 	char driveLetter;				// Kí tự ô đĩa
-	Bootsector_FAT32 info;			// 512 bytes của Bootsector
+	Bootsector info;				// 512 bytes của Bootsector
 	int bytesPerSector;				// Số byte của 1 sector
 	int sectorsPerCluster;			// Số sector của 1 cluster
 	uint64_t sectorFAT1;			// Sector đầu tiên của FAT1
@@ -58,7 +58,6 @@ public:
 	void readInfo();				// Đọc bootsector
 	void printInfo();				// In bảng bootsector
 
-	wchar_t* getStrLetter();		// Ví dụ: \\\\.\\F:
 	uint64_t getOffsetRDET();
 	uint64_t getBytesPerSector();
 

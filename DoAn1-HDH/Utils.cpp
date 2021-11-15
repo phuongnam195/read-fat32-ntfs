@@ -1,3 +1,5 @@
+#pragma warning(disable:4996)
+
 #include "Utils.h"
 #include <sstream>
 #include <sstream>
@@ -84,4 +86,17 @@ string Utils::trimRight(string s) {
 		s.pop_back();
 	}
 	return s;
+}
+
+wchar_t* Utils::getStrLetter(char letter) {
+	wchar_t* result;
+
+	string s = "\\\\.\\";
+	s.push_back(letter);
+	s.push_back(':');
+	const size_t cSize = strlen(s.c_str()) + 1;
+	result = new wchar_t[cSize];
+	mbstowcs(result, s.c_str(), cSize);
+
+	return result;
 }
