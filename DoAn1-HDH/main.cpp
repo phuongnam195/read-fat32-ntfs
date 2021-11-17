@@ -15,6 +15,7 @@ int main() {
 		ntfs.readInfo();
 		while (true) {
 			system("cls");
+			cout << " Volume " << (char)toupper(letter) << " - NTFS" << endl << endl;
 			cout << " [1] View the information" << endl;
 			cout << " [2] Display directory tree information" << endl;
 			cout << endl;
@@ -31,7 +32,7 @@ int main() {
 				system("pause");
 				break;
 			case 2:
-				//ntfs.displayDirectory();
+				ntfs.displayDirectory();
 				break;
 			default:
 				break;
@@ -42,6 +43,7 @@ int main() {
 	{
 		while (true) {
 			system("cls");
+			cout << " Volume " << (char)toupper(letter) << " - FAT32" << endl << endl;
 			cout << " [1] View the information" << endl;
 			cout << " [2] Display directory tree information" << endl;
 			cout << endl;

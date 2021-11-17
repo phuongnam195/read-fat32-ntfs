@@ -3,7 +3,10 @@
 #include <Windows.h>
 #include <cstdint>
 #include <string>
+#include <vector>
 using namespace std;
+
+#define BRANCH (char)192
 
 class Utils {
 public:
@@ -27,4 +30,7 @@ public:
 
 	// Chuyển letter thành string: \\\\.\\F:
 	static wchar_t* getStrLetter(char letter);
+
+	// Phân tách chuỗi
+	static vector<string>split(string haystack, string needle);
 };

@@ -5,7 +5,7 @@
 #include <sstream>
 #include <iomanip>
 
-bool Utils::ReadSector(LPCWSTR  drive, UINT64 offset, BYTE* result, UINT32 length) {
+bool Utils::ReadSector(LPCWSTR drive, UINT64 offset, BYTE* result, UINT32 length) {
 	if (length % 512 != 0) {
 		return false;
 	}
@@ -14,7 +14,7 @@ bool Utils::ReadSector(LPCWSTR  drive, UINT64 offset, BYTE* result, UINT32 lengt
 	DWORD bytesRead;
 	HANDLE device = NULL;
 
-	device = CreateFile(drive,    // Drive to open
+	device = CreateFile(drive,  // Drive to open
 		GENERIC_READ,           // Access mode
 		FILE_SHARE_READ | FILE_SHARE_WRITE,        // Share Mode
 		NULL,                   // Security Descriptor
@@ -98,5 +98,28 @@ wchar_t* Utils::getStrLetter(char letter) {
 	result = new wchar_t[cSize];
 	mbstowcs(result, s.c_str(), cSize);
 
+	return result;
+}
+
+vector<string> Utils::split(string haystack, string needle)
+{
+	vector<string> result;
+	int startPos = 0;
+	size_t foundPos = 0;
+
+	while (true)
+	{
+		foundPos = haystack.find(needle, startPos);
+		if (foundPos != string::npos) {
+			string token = haystack.substr(startPos, foundPos - startPos);
+			result.push_back(token);
+			startPos = foundPos + needle.length();
+		}
+		else {
+			string token = haystack.substr(startPos, haystack.length() - startPos);
+			result.push_back(token);
+			break;
+		}
+	}
 	return result;
 }

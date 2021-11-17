@@ -8,8 +8,6 @@
 #include <stack>
 using namespace std;
 
-#define BRANCH (char)192
-
 FAT32::FAT32() {}
 
 FAT32::FAT32(char letter) {
@@ -39,13 +37,14 @@ void FAT32::printInfo() {
 	cout << "| Sectors per cluster       | " << setw(SPACE) << sectorsPerCluster << " |" << endl;
 	cout << "| Reserved sectors          | " << setw(SPACE) << Utils::reverseByte(info.BPB_RsvdSecCnt, 2) << " |" << endl;
 	cout << "| Number of FATs            | " << setw(SPACE) << Utils::reverseByte(info.BPB_NumFATs, 1) << " |" << endl;
-	cout << "| Media Type                | " << setw(SPACE) << (Utils::reverseByte(info.BPB_Media,1) == 0xF8 ? "Fixed Disk (F8)" : Utils::decToHex(Utils::reverseByte(info.BPB_Media, 1))) << " |" << endl;
-	cout << "| Sectors / Track           | " << setw(SPACE) << Utils::reverseByte(info.BPB_SecPerTrk, 2) << " |" << endl;
+	cout << "| Media descriptor          | " << setw(SPACE) << (Utils::reverseByte(info.BPB_Media,1) == 0xF8 ? "Fixed Disk (F8)" : Utils::decToHex(Utils::reverseByte(info.BPB_Media, 1))) << " |" << endl;
+	cout << "| Sectors per track         | " << setw(SPACE) << Utils::reverseByte(info.BPB_SecPerTrk, 2) << " |" << endl;
 	cout << "| Number of Heads           | " << setw(SPACE) << Utils::reverseByte(info.BPB_NumHeads, 2) << " |" << endl;
-	cout << "| Hidden Sectors            | " << setw(SPACE) << Utils::reverseByte(info.BPB_HiddSec, 4) << " |" << endl;
+	cout << "| Hidden sectors            | " << setw(SPACE) << Utils::reverseByte(info.BPB_HiddSec, 4) << " |" << endl;
 	cout << "| Total sectors             | " << setw(SPACE) << Utils::reverseByte(info.BPB_TotSec32, 4) << " |" << endl;
-	cout << "| Sectors / FAT             | " << setw(SPACE) << Utils::reverseByte(info.BPB_FATSz32, 4) << " |" << endl;
-	cout << "| Cluster Number for RDET   | " << setw(SPACE) << Utils::reverseByte(info.BPB_RootClus, 4) << " |" << endl;
+	cout << "| Sectors per FAT           | " << setw(SPACE) << Utils::reverseByte(info.BPB_FATSz32, 4) << " |" << endl;
+	cout << "| RDET cluster              | " << setw(SPACE) << Utils::reverseByte(info.BPB_RootClus, 4) << " |" << endl;
+	cout << "| Backup Boot sector        | " << setw(SPACE) << Utils::reverseByte(info.BPB_BkBootSec, 2) << " |" << endl;
 	string logicalDriveNumber;
 	if (Utils::reverseByte(info.BS_DrvNum, 1) == 0x00) {
 		logicalDriveNumber = "Floppy Disk (00)";
@@ -56,7 +55,7 @@ void FAT32::printInfo() {
 	else {
 		logicalDriveNumber = "0x" + Utils::decToHex(Utils::reverseByte(info.BS_DrvNum, 1));
 	}
-	cout << "| Logical Drive Number      | " << setw(SPACE) << logicalDriveNumber << " |" << endl;
+	cout << "| Physical drive            | " << setw(SPACE) << logicalDriveNumber << " |" << endl;
 	cout << "| First sector of FAT1      | " << setw(SPACE) << sectorFAT1 << " |" << endl;
 	cout << "| First sector of RDET      | " << setw(SPACE) << sectorRDET << " |" << endl;
 	cout << "|___________________________|____________________|" << endl;
@@ -86,126 +85,8 @@ void FAT32::readFAT1() {
 	delete[] bytesFAT1;
 }
 
-//vector<Item_FAT32> FAT32::scanItemsInFolder(int offset) {
-//	vector<Item_FAT32> result;
-//
-//	stack<ExtraEntry> stkExtraEntry;
-//
-//	if (FAT1.empty()) {
-//		readFAT1();
-//	}
-//
-//	// Do chỉ có thể đọc 1 khối 512, 1024,... (bytes) nên không thể đọc lẻ 32 bytes
-//	BYTE sixteenEntry[512];
-//	int index = 16;
-//	int cOffset = offset;
-//
-//	while (true) {
-//		if (index == 16) {
-//			Utils::ReadSector(driveLetter, cOffset, sixteenEntry);
-//			cOffset += 512;
-//			index = 0;
-//		}
-//		BYTE entry[32];
-//		for (int i = 0; i < 32; i++) {
-//			entry[i] = sixteenEntry[index * 32 + i];
-//		}
-//		index++;
-//		
-//
-//		if ((int)entry[0] == 0x00) {
-//			return result;
-//		} else if ((int)entry[0] == 0xE5 || (int)entry[0] == 0x2E) {
-//			continue;
-//		}
-//
-//		MainEntry mainEntry;
-//		memcpy(&mainEntry, entry, 32);
-//
-//		if (mainEntry.Attr == 0x0F) {
-//			ExtraEntry extraEntry;
-//			memcpy(&extraEntry, entry, 32);
-//			stkExtraEntry.push(extraEntry);
-//		}
-//		else if (Utils::getBit(mainEntry.Attr, ATTR_BIT_VOLUME_ID)) {
-//			stringstream builder;
-//			if (stkExtraEntry.empty()) {
-//				builder << mainEntry.Name;
-//			}
-//			else {
-//				while (!stkExtraEntry.empty()) {
-//					ExtraEntry extraEntry = stkExtraEntry.top(); stkExtraEntry.pop();
-//					builder << extraEntry.Name1;
-//					builder << extraEntry.Name2;
-//					builder << extraEntry.Name3;
-//				}
-//			}
-//			
-//			volumeName = builder.str();
-//		}
-//		else if (Utils::getBit(mainEntry.Attr, ATTR_BIT_ARCHIVE) || 
-//				Utils::getBit(mainEntry.Attr, ATTR_BIT_DIRECTORY)) {
-//			Item_FAT32 file;
-//			stringstream builder;
-//
-//			if (stkExtraEntry.empty()) {
-//				for (int i = 0; i < 8; i++) {
-//					builder << mainEntry.Name[i];
-//				}
-//				file.setName(Utils::trimRight(builder.str()));
-//
-//				builder.str("");
-//				for (int i = 0; i < 3; i++) {
-//					builder << mainEntry.Ext[i];
-//				}
-//				file.setExtension(Utils::trimRight(builder.str()));
-//			}
-//			else {
-//				while (!stkExtraEntry.empty()) {
-//					ExtraEntry extraEntry = stkExtraEntry.top(); stkExtraEntry.pop();
-//					for (int i = 0; i < 5; i++) {
-//						builder << extraEntry.Name1[i * 2];
-//					}
-//					for (int i = 0; i < 6; i++) {
-//						builder << extraEntry.Name2[i * 2];
-//					}
-//					for (int i = 0; i < 2; i++) {
-//						builder << extraEntry.Name3[i * 2];
-//					}
-//					string rawName = builder.str();
-//					if (rawName.find('.') == string::npos) {
-//						file.setName(Utils::trimRight(rawName));
-//					}
-//					else {
-//						int dot = rawName.size() - 1;
-//						while (rawName[dot] != '.') dot--;
-//						file.setName(Utils::trimRight(rawName.substr(0, dot)));
-//						file.setExtension(Utils::trimRight(rawName.substr(dot + 1)));
-//					}
-//				}
-//			}
-//			file.setAttribute(mainEntry.Attr);
-//			file.setSize(Utils::reverseByte(mainEntry.FileSize, 4));
-//			int firstCluster = Utils::reverseByte(mainEntry.FstClusLH, 2) * 10 + Utils::reverseByte(mainEntry.FstClusLO, 2);
-//			file.setFirstSector(firstCluster);
-//			if (firstCluster != 0) {
-//				int clt = firstCluster;
-//				vector<int> sectors;
-//				while (clt != FAT_EOF1 && clt != FAT_EOF2 && clt != FAT_EOF3) {
-//					for (int i = 0; i < sectorsPerCluster; i++) {
-//						sectors.push_back((clt - 2) * sectorsPerCluster + offset / bytesPerSector);
-//					}
-//					clt = FAT1[clt];
-//				}
-//				file.setSectors(sectors);
-//			}
-//			result.push_back(file);
-//		}
-//	}
-//}
-
 void FAT32::printData(Item_FAT32 file) {
-	if (!file.isTextFile()) {
+	if (!file.isTXT()) {
 		cout << "> Please use compatible software to read the content!";
 		return;
 	}
@@ -304,7 +185,7 @@ vector<Item_FAT32> FAT32::scanItemsInRDET() {
 	int index = 0;
 
 	while (index < 4096 / 32) {
-		if ((int)bytesRDET[index * 32] == 0xE5 || (int)bytesRDET[index * 32] == 0x2E) {
+		if ((int)bytesRDET[index * 32] == 0xE5) {
 			index++;
 			continue;
 		}

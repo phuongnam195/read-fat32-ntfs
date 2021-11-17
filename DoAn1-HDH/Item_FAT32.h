@@ -63,7 +63,7 @@ public:
 	void setExtension(string ext);
 	string getExtension();
 	string getFullname();			// Lấy tên (ghép đuôi file nếu có)
-	bool isTextFile();				// true nếu đây là file .txt
+	bool isTXT();					// true nếu đây là file .txt
 
 	void setAttribute(BYTE attribute);
 	BYTE getAttribute();

@@ -32,7 +32,7 @@ string Item_FAT32::getFullname() {
 	return name;
 }
 
-bool Item_FAT32::isTextFile() {
+bool Item_FAT32::isTXT() {
 	string ext = extension;
 	for (int i = 0; i < ext.size(); i++) {
 		ext[i] = toupper(ext[i]);

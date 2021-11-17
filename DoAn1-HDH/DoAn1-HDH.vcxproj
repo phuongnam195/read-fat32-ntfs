@@ -142,12 +142,14 @@
     <ClCompile Include="FAT32.cpp" />
     <ClCompile Include="Item_FAT32.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MFT_Entry.cpp" />
     <ClCompile Include="NTFS.cpp" />
     <ClCompile Include="Utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="FAT32.h" />
     <ClInclude Include="Item_FAT32.h" />
+    <ClInclude Include="MFT_Entry.h" />
     <ClInclude Include="NTFS.h" />
     <ClInclude Include="Utils.h" />
   </ItemGroup>

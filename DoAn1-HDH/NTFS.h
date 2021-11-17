@@ -1,8 +1,16 @@
 ﻿#pragma once
+#include "MFT_Entry.h"
 #include <cstdint>
+#include <Windows.h>
+#include <vector>
 
-struct VBR
-{
+#define ATTR_STANDARD_INFORMATION   0x10
+#define ATTR_FILE_NAME              0x30
+#define ATTR_DATA                   0x80
+
+#define ROOT_INDEX                  5
+
+struct VBR {
     uint8_t jumpCode[3];            // Lệnh nhảy đến đoạn boot code - 3 bytes
     uint8_t OEM_ID[8];              // Loại - 8 bytes
     uint8_t Bytes_Sector[2];        // Kích thước một sector(tính bằng byte) - 2 bytes
@@ -36,6 +44,8 @@ private:
     VBR info;                       // 512 bytes của VBR
     int bytesPerSector;				// Số byte của 1 sector
     int sectorsPerCluster;			// Số sector của 1 cluster
+    int sizeOfMFTEntry;             // Kích thước của 1 MFT entry
+    vector<MFT_Entry> mftEntries;   // Danh sách các MFT entry
 
 public:
     NTFS();
@@ -44,4 +54,10 @@ public:
 
     void readInfo();				// Đọc VBR
     void printInfo();				// In bảng VBR
+
+    void displayDirectory();
+    void scanAllEntries();
+    MFT_Entry readEntry(BYTE bytes[]);
+    
+    void printData(MFT_Entry file);
 };
