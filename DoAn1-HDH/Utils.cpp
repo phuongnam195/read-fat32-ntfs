@@ -82,7 +82,7 @@ string Utils::formatSize(long long size) {
 }
 
 string Utils::trimRight(string s) {
-	while (s.size() > 0 && s[s.size() - 1] == ' ') {
+	while (s.size() > 0 && (s[s.size() - 1] == ' ' || s[s.size() - 1] == -1 || s[s.size() - 1] == 0)) {
 		s.pop_back();
 	}
 	return s;

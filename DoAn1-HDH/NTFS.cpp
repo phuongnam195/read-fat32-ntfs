@@ -171,10 +171,13 @@ MFT_Entry NTFS::readEntry(BYTE bytes[]) {
 			result.setAttributes(permission);
 		}
 		else if (attributeType == ATTR_FILE_NAME) {
+			if (result.getId() == 39) {
+				cout << "d." << endl;
+			}
 			unsigned int parentId = Utils::reverseByte(bytes + offsetContent, 2);
 			result.setParentId(parentId);
 
-			long long size = Utils::reverseByte(bytes + offsetContent + 48, 8);
+			unsigned long long int size = Utils::reverseByte(bytes + offsetContent + 48, 8);
 			result.setSize(size);
 
 			string name;
@@ -185,12 +188,14 @@ MFT_Entry NTFS::readEntry(BYTE bytes[]) {
 			result.setName(name);
 		}
 		else if (attributeType == ATTR_DATA) {
-			bool nonResidentFlag = Utils::reverseByte(bytes + offsetContent + 8, 1);
+			bool nonResidentFlag = Utils::reverseByte(bytes + offsetAttribute + 8, 1);
 			if (nonResidentFlag) {
 				int firstCluster = Utils::reverseByte(bytes + offsetContent + 2, 3);
 				result.setFirstSector(firstCluster * sectorsPerCluster);
 			}
 			else {
+				int size = Utils::reverseByte(bytes + offsetAttribute + 16, 4);
+				result.setSize(size);
 				string data;
 				for (int i = 0; i < result.getSize(); i++) {
 					data.push_back(bytes[offsetContent + i]);

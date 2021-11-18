@@ -240,7 +240,9 @@ vector<Item_FAT32> FAT32::scanItemsInRDET() {
 				for (int i = 0; i < 8; i++) {
 					builder << mainEntry.Name[i];
 				}
-				file.setName(Utils::trimRight(builder.str()));
+				string name = builder.str();
+				name = name.substr(0, 8);
+				file.setName(Utils::trimRight(name));
 
 				builder.str("");
 				for (int i = 0; i < 3; i++) {
@@ -260,16 +262,16 @@ vector<Item_FAT32> FAT32::scanItemsInRDET() {
 					for (int i = 0; i < 2; i++) {
 						builder << extraEntry.Name3[i * 2];
 					}
-					string rawName = builder.str();
-					if (rawName.find('.') == string::npos) {
-						file.setName(Utils::trimRight(rawName));
-					}
-					else {
-						int dot = rawName.size() - 1;
-						while (rawName[dot] != '.') dot--;
-						file.setName(Utils::trimRight(rawName.substr(0, dot)));
-						file.setExtension(Utils::trimRight(rawName.substr(dot + 1)));
-					}
+				}
+				string rawName = builder.str();
+				if (rawName.find('.') == string::npos) {
+					file.setName(Utils::trimRight(rawName));
+				}
+				else {
+					int dot = rawName.size() - 1;
+					while (rawName[dot] != '.') dot--;
+					file.setName(Utils::trimRight(rawName.substr(0, dot)));
+					file.setExtension(Utils::trimRight(rawName.substr(dot + 1)));
 				}
 			}
 			file.setAttribute(mainEntry.Attr);

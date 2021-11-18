@@ -5,6 +5,7 @@
 
 MFT_Entry::MFT_Entry() {
 	_firstSector = -1;
+	_size = 0;
 }
 
 unsigned int MFT_Entry::getId() {
@@ -23,7 +24,7 @@ string MFT_Entry::getData() {
 	return _data;
 }
 
-long long MFT_Entry::getSize() {
+unsigned long long int MFT_Entry::getSize() {
 	return _size;
 }
 
@@ -70,7 +71,7 @@ void MFT_Entry::setName(string name) {
 void MFT_Entry::setData(string data) {
 	_data = data;
 }
-void MFT_Entry::setSize(long long size) {
+void MFT_Entry::setSize(unsigned long long int  size) {
 	_size = size;
 }
 
@@ -98,7 +99,9 @@ void MFT_Entry::printInfo(int number) {
 	if (isSystem()) cout << "system ";
 	cout << endl;
 
-	cout << "     Size: " << Utils::formatSize(_size) << endl;
+	if (_isFile) {
+		cout << "     Size: " << Utils::formatSize(_size) << endl;
+	}
 	cout << "     Data: ";
 	if (_firstSector == -1) {
 		cout << "resident" << endl;

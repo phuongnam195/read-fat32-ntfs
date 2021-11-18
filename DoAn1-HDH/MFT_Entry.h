@@ -13,7 +13,7 @@ private:
 	unsigned int _parentId;
 	string _name;
 	string _data;
-	long long _size;
+	unsigned long long int _size;
 	int _attributes;
 	bool _isFile;
 	long _firstSector;			// Sector bắt đầu của dữ liệu, dùng trong trường hợp non-resident
@@ -24,7 +24,7 @@ public:
 	unsigned int getParentId();
 	string getName();
 	string getData();
-	long long getSize();
+	unsigned long long int getSize();
 	int getAttributes();
 	bool isReadOnly();
 	bool isHidden();
@@ -37,7 +37,7 @@ public:
 	void setParentId(unsigned int);
 	void setName(string);
 	void setData(string);
-	void setSize(long long);
+	void setSize(unsigned long long int);
 	void setAttributes(int);
 	void setIsFile(bool);
 	void setFirstSector(int);
