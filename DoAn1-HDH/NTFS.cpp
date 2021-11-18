@@ -23,6 +23,7 @@ void NTFS::readInfo() {
 
 	bytesPerSector = Utils::reverseByte(info.Bytes_Sector, 2);
 	sectorsPerCluster = info.Sectors_Cluster;
+	sizeOfMFTEntry = (int)pow(2, abs(info.Cluster_FRS));
 }
 
 void NTFS::printInfo() {
@@ -40,7 +41,7 @@ void NTFS::printInfo() {
 	cout << "| Total sectors            | " << setw(SPACE) << info.total_sectors << " |" << endl;
 	cout << "| $MFT cluster number      | " << setw(SPACE) << info.Logical_MFT << " |" << endl;
 	cout << "| $MFTMirr cluster number  | " << setw(SPACE) << info.Logical_MFTMirr << " |" << endl;
-	cout << "| Size of MFT entry        | " << setw(SPACE) << (int)pow(2, abs(info.Cluster_FRS)) << " |" << endl;
+	cout << "| Size of MFT entry        | " << setw(SPACE) << sizeOfMFTEntry << " |" << endl;
 	cout << "| Cluster per Index Buffer | " << setw(SPACE) << (int)info.Cluster_Index_Buffer << " |" << endl;
 	cout << "| Volume serial number:    | " << setw(SPACE) << info.Volume << " |" << endl;
 	cout << "|__________________________|_____________________|" << endl;
@@ -113,13 +114,14 @@ void NTFS::scanAllEntries() {
 
 	int offset = info.Logical_MFT * sectorsPerCluster * bytesPerSector;
 	int emptyEntriesCount = 0;
+	BYTE* bytes = new BYTE[sizeOfMFTEntry];
 
 	vector<unsigned int> systemFolderIDs;		// Chứa ID các thư mục system
 
+	// Nếu số entry rỗng liên tiếp vượt FRAGMENTED_LIMIT (50) thì ngừng đọc
 	while (emptyEntriesCount < FRAGMENTED_LIMIT) {
-		BYTE bytes[1024];
-		Utils::ReadSector(Utils::getStrLetter(driveLetter), offset, bytes, 1024);
-		offset += 1024;
+		Utils::ReadSector(Utils::getStrLetter(driveLetter), offset, bytes, sizeOfMFTEntry);
+		offset += sizeOfMFTEntry;
 		if (Utils::reverseByte(bytes, 4) == 0) {
 			emptyEntriesCount++;
 			continue;
@@ -129,7 +131,7 @@ void NTFS::scanAllEntries() {
 
 		int flag = Utils::reverseByte(bytes + 22, 2);
 
-		// Not in use (có thể đã xóa)
+		// Not in use (đã xóa)
 		if (Utils::getBit(flag, 0) == 0) {
 			continue;
 		}
@@ -147,6 +149,8 @@ void NTFS::scanAllEntries() {
 			mftEntries.push_back(entry);
 		}
 	}
+
+	delete[] bytes;
 }
 
 MFT_Entry NTFS::readEntry(BYTE bytes[]) {

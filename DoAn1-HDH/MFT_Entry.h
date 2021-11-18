@@ -33,7 +33,6 @@ public:
 	bool isFolder();
 	int getFirstSector();
 
-
 	void setId(unsigned int);
 	void setParentId(unsigned int);
 	void setName(string);
@@ -46,4 +45,3 @@ public:
 	void printInfo(int number);
 	bool isTXT();
 };
-
