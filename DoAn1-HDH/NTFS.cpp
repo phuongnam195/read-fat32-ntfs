@@ -43,7 +43,6 @@ void NTFS::printInfo() {
 	cout << "| $MFTMirr cluster number  | " << setw(SPACE) << info.Logical_MFTMirr << " |" << endl;
 	cout << "| Size of MFT entry        | " << setw(SPACE) << sizeOfMFTEntry << " |" << endl;
 	cout << "| Cluster per Index Buffer | " << setw(SPACE) << (int)info.Cluster_Index_Buffer << " |" << endl;
-	cout << "| Volume serial number:    | " << setw(SPACE) << info.Volume << " |" << endl;
 	cout << "|__________________________|_____________________|" << endl;
 	cout << endl;
 }
